@@ -12,11 +12,12 @@ public class PlayerController : MonoBehaviour {
 	public SpriteRenderer spriteRenderer;
 	public List<Sprite> directionalCharacterSprites;
 
-	public Transform floorTiles;
+	public Transform groundTiles;
 	public Transform wallTiles;
 	public Transform ladderTilesUp;
 	public Transform ladderTilesDown;
-
+	public Transform waterEdgeTiles;
+	
 	public Transform layers;
 	public Transform currentLayer;
 
@@ -24,7 +25,7 @@ public class PlayerController : MonoBehaviour {
 		currentLayer = transform.parent;
 		layers = currentLayer.parent;
 		SetTileRefrences(currentLayer);
-		SetLayerRender(transform.position);
+		//SetLayerRender(transform.position);
 	}
 
 	void Update () {
@@ -64,7 +65,7 @@ public class PlayerController : MonoBehaviour {
 
 		if(Input.GetMouseButtonDown(1)){
 			Vector2 mousePos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-			Transform ladderUp = GetLadderUp(mousePos);
+			Transform ladderUp = GetTileMouse(mousePos, ladderTilesUp);
 
 			if(ladderUp && Vector3.Distance(transform.position, ladderUp.position) < 1.5f){
 				if(isMoving)
@@ -89,9 +90,10 @@ public class PlayerController : MonoBehaviour {
 
 	public void MoveToTile(Vector3 direction){
 		Vector3 nextPos = transform.position + direction;
-		Transform wall = GetWall(nextPos);
-		Transform floor = GetFloor(nextPos);
-		Transform ladderDown = GetLadderDown(nextPos);
+		Transform wall = GetTile(nextPos, wallTiles);
+		Transform ground = GetTile(nextPos, groundTiles);
+		Transform ladderDown = GetTile(nextPos, ladderTilesDown);
+		Transform waterEdge = GetTile(nextPos, waterEdgeTiles);
 
 		if(ladderDown){
 			if(spriteRenderer.sortingOrder == 1)
@@ -102,41 +104,25 @@ public class PlayerController : MonoBehaviour {
 			transform.position = ladderDown.position + Vector3.right + Vector3.down;
 			SetTileRefrences(newLayer);
 			currentLayer = newLayer;
-		}else if(floor && !wall){
+		}else if(ground && !wall && !waterEdge){
 			SetSortingLayer(nextPos);
-			SetLayerRender(nextPos);
+			//SetLayerRender(nextPos);
 			target = nextPos;
 			isMoving = true; 
 		}
 	}
 
-	public Transform GetWall(Vector3 nextPos){
-		foreach(Transform tile in wallTiles){
+	public Transform GetTile(Vector3 nextPos, Transform tiles){
+		foreach(Transform tile in tiles){
 			if(tile.position == nextPos)
-				return tile;
-		}
-		return null;
-	}
-
-	public Transform GetFloor(Vector3 nextPos){
-		foreach(Transform tile in floorTiles){
-			if(tile.position == nextPos)
-				return tile;
-		}
-		return null;
-	}
-	
-	public Transform GetFloor(Vector3 pos, Transform floorTiles){
-		foreach(Transform tile in floorTiles){
-			if(tile.position == pos)
 				return tile;
 		}
 		return null;
 	}
 
 	//check bounds for right click
-	public Transform GetLadderUp(Vector3 mousePos){
-		foreach(Transform tile in ladderTilesUp){
+	public Transform GetTileMouse(Vector3 mousePos, Transform tiles){
+		foreach(Transform tile in tiles){
 			SpriteRenderer tileSprite = tile.GetComponent<SpriteRenderer>();
 			if(tileSprite.bounds.Contains(mousePos))
 				return tile;
@@ -144,41 +130,26 @@ public class PlayerController : MonoBehaviour {
 		return null;
 	}
 
-	//check player pos
-	public Transform GetLadderUp1(Vector3 nextPos){
-		foreach(Transform tile in ladderTilesUp){
-			if(tile.position == nextPos)
-				return tile;
-		}
-		return null;
+	//index position within floor GO
+	public void SetTileRefrences(Transform floor){
+		groundTiles = floor.GetChild(0);
+		wallTiles = floor.GetChild(1);
+		ladderTilesUp = floor.GetChild(2);
+		ladderTilesDown = floor.GetChild(3);
+		waterEdgeTiles = floor.GetChild(4);
 	}
 
-	public Transform GetLadderDown(Vector3 nextPos){
-		foreach(Transform tile in ladderTilesDown){
-			if(tile.position == nextPos)
-				return tile;
-		}
-		return null;
-	}
-
-	public void SetTileRefrences(Transform layer){
-		floorTiles = layer.GetChild(0);
-		wallTiles = layer.GetChild(1);
-		ladderTilesUp = layer.GetChild(2);
-		ladderTilesDown = layer.GetChild(3);
-	}
-
-	//set playerRenderer sorting layer
+	//set playerRenderer sorting floor
 	public void SetSortingLayer(Vector3 nextPos){
 		//sort order 3 for player render above
 		//sort order 1 for player render below
-		Transform wallUp = GetWall(nextPos + Vector3.up);
-		Transform wallRight = GetWall(nextPos + Vector3.right);
-		Transform wallDown = GetWall(nextPos + Vector3.down);
-		Transform wallLeft = GetWall(nextPos + Vector3.left);
+		Transform wallUp = GetTile(nextPos + Vector3.up, wallTiles);
+		Transform wallRight = GetTile(nextPos + Vector3.right, wallTiles);
+		Transform wallDown = GetTile(nextPos + Vector3.down, wallTiles);
+		Transform wallLeft = GetTile(nextPos + Vector3.left, wallTiles);
 		
-		Transform ladderAt = GetLadderUp1(nextPos);
-		Transform ladderDown = GetLadderUp1(nextPos + Vector3.down);
+		Transform ladderAt = GetTile(nextPos, ladderTilesUp);
+		Transform ladderDown = GetTile(nextPos + Vector3.down, ladderTilesUp);
 
 		if(wallDown || wallRight || ladderDown)
 			spriteRenderer.sortingOrder = 1;
@@ -194,16 +165,16 @@ public class PlayerController : MonoBehaviour {
 		int index = currentLayer.GetSiblingIndex() -1;	
 		if(index < 0)
 			return;
-		Transform layer = layers.GetChild(index);
+		Transform floor = layers.GetChild(index);
 
-		Transform floorAboveUp = GetFloor(nextPos + Vector3.up, layer.GetChild(0));
-		Transform floorAboveRight = GetFloor(nextPos + Vector3.right, layer.GetChild(0));
-		Transform floorAboveDown = GetFloor(nextPos + Vector3.down, layer.GetChild(0));
-		Transform floorAboveLeft = GetFloor(nextPos + Vector3.left, layer.GetChild(0));
+		Transform floorAboveUp = GetTile(nextPos + Vector3.up, floor.GetChild(0));
+		Transform floorAboveRight = GetTile(nextPos + Vector3.right, floor.GetChild(0));
+		Transform floorAboveDown = GetTile(nextPos + Vector3.down, floor.GetChild(0));
+		Transform floorAboveLeft = GetTile(nextPos + Vector3.left, floor.GetChild(0));
 
 		if(floorAboveUp || floorAboveRight || floorAboveDown || floorAboveLeft)
-			layer.gameObject.SetActive(false);
+			floor.gameObject.SetActive(false);
 		else
-			layer.gameObject.SetActive(true);
+			floor.gameObject.SetActive(true);
 	}
 }
