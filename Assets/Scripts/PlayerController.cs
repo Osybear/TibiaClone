@@ -12,8 +12,7 @@ public class PlayerController : MonoBehaviour {
 
 	public new Camera camera;
 	public new SpriteRenderer renderer;
-	public Animator animator;
-	
+
 	public Transform floors;
 	public Transform currentFloor;
 
@@ -24,6 +23,12 @@ public class PlayerController : MonoBehaviour {
 	public Transform waterEdgeTiles;
 	public Transform rampTiles;
 
+	public Sprite[] upAnim;
+	public Sprite[] rightAnim;
+	public Sprite[] downAnim;
+	public Sprite[] leftAnim;
+	public Sprite[] currentAnim;
+	
 	private void Start() {
 		currentFloor = transform.parent;
 		floors = currentFloor.parent;
@@ -33,25 +38,36 @@ public class PlayerController : MonoBehaviour {
 
 	void Update () {
 		if(!isMoving){
-			if(Input.GetKeyDown(KeyCode.W))
+			if(Input.GetKey(KeyCode.W))
 				MoveToTile(Vector3.up);
-			if(Input.GetKeyDown(KeyCode.A))
+			if(Input.GetKey(KeyCode.A))
 				MoveToTile(Vector3.left);
-			if(Input.GetKeyDown(KeyCode.S))
+			if(Input.GetKey(KeyCode.S))
 				MoveToTile(Vector3.down);
-			if(Input.GetKeyDown(KeyCode.D))
+			if(Input.GetKey(KeyCode.D))
 				MoveToTile(Vector3.right);
 		}
 
 		if(isMoving){
 			float step = speed * Time.deltaTime;
+			float distance = Vector3.Distance(transform.position, targetPos);
+
+			if(distance >= 1)
+				renderer.sprite = currentAnim[1];
+			else if(distance < .75 && distance > .5)
+				renderer.sprite = currentAnim[2];
+			else if(distance < .5 && distance > .25)
+				renderer.sprite = currentAnim[1];
+			else if(distance < .25)
+				renderer.sprite = currentAnim[2];
+
 			transform.position = Vector3.MoveTowards(transform.position, targetPos, step);
 
-			float distance = Vector3.Distance(transform.position, targetPos);
-			animator.SetFloat("distance", distance);
-			if(transform.position == targetPos){ //when the player reaches target postion
+			if(transform.position == targetPos){//when the player reaches target postion
 				isMoving = false;
-				animator.SetFloat("distance", 0);
+				//set only if they will not move the same frame they finish
+				if(!Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.D))
+					renderer.sprite = currentAnim[0];
 			}
 		}
 
@@ -61,7 +77,8 @@ public class PlayerController : MonoBehaviour {
 
 			if(ladderUp && Vector3.Distance(transform.position, ladderUp.position) < 1.5f){
 				if(isMoving)
-					isMoving = false;
+					isMoving = false;				
+
 				Transform newLayer = floors.GetChild(currentFloor.GetSiblingIndex() -1);
 				newLayer.gameObject.SetActive(true);
 				transform.SetParent(newLayer);
@@ -71,6 +88,17 @@ public class PlayerController : MonoBehaviour {
 			}
 		}
 		
+	}
+
+	public void SetAnimation(Vector3 direction){
+		if(direction == Vector3.up)
+			currentAnim = upAnim;
+		if(direction == Vector3.right)
+			currentAnim = rightAnim;
+		if(direction == Vector3.down)
+			currentAnim = downAnim;
+		if(direction == Vector3.left)
+			currentAnim = leftAnim;
 	}
 
 	public void MoveToTile(Vector3 direction){
@@ -93,16 +121,9 @@ public class PlayerController : MonoBehaviour {
 		}else if(ground && !wall && !waterEdge){
 			SetSortingLayer(nextPos);
 			SetFloorRender(nextPos);
+			SetAnimation(direction);
 			targetPos = nextPos;
 			isMoving = true;
-			SetAnimation(direction);
-		}
-	}
-	
-	//Handles the animator component on the player
-	public void SetAnimation(Vector3 direction){
-		if(direction == Vector3.down){
-			animator.SetTrigger("down");
 		}
 	}
 
@@ -181,10 +202,8 @@ public class PlayerController : MonoBehaviour {
 
 	}
 
-	//if there is a tile on the floor above
-	//set all other floor invisible
-	//when the player is "underground" no need to check Floor Render above
-	public void SetFloorRender(Vector3 nextPos){	
+	// if tile above character dont render floor
+	public void SetFloorRender(Vector3 nextPos){		
 		int index = currentFloor.GetSiblingIndex() -1; // index for the floor above 
 		if(index < 0) // out of bounds
 			return;
@@ -192,10 +211,10 @@ public class PlayerController : MonoBehaviour {
 		Transform groundTiles = floorAbove.Find("GroundTiles");
 		Transform holeTiles = floorAbove.Find("HoleTiles");
 
-		Transform groundTile = GetTile(nextPos, groundTiles);
-		Transform holeTile = GetTile(nextPos, holeTiles);
+		Transform ground = GetTile(nextPos, groundTiles);
+		Transform hole = GetTile(nextPos, holeTiles);
 		
-		if(groundTile || holeTile){
+		if(ground || hole){
 			for(int i = index; i >= 0; i--) // set all the floors above deactivated
 				floors.GetChild(i).gameObject.SetActive(false);	
 		}
