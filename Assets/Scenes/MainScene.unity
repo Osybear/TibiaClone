@@ -10998,7 +10998,6 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 1050465011}
   - {fileID: 1478345158}
   - {fileID: 1649383967}
   - {fileID: 951257345}
@@ -28376,7 +28375,7 @@ Transform:
   - {fileID: 966079130}
   - {fileID: 1337356549}
   m_Father: {fileID: 365743497}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!210 &951257346
 SortingGroup:
@@ -31292,34 +31291,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4756383416592170, guid: 6a30df1bbeaae8e478bd05dd6b8974e6,
     type: 2}
   m_PrefabInternal: {fileID: 1736066740}
---- !u!1 &1050465010
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1050465011}
-  m_Layer: 0
-  m_Name: Floor 2
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1050465011
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1050465010}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 365743497}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1051301965 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4313163037412936, guid: 0a2286efcafaf23418592a5950af1495,
@@ -38052,6 +38023,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 406072781}
+  nextMove: 0
   speed: 2
   isMoving: 0
   targetPos: {x: 0, y: 0, z: 0}
@@ -42488,7 +42460,7 @@ Transform:
   m_Children:
   - {fileID: 246246262}
   m_Father: {fileID: 365743497}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!210 &1478345159
 SortingGroup:
@@ -47572,7 +47544,7 @@ Transform:
   - {fileID: 406072781}
   - {fileID: 1330181900}
   m_Father: {fileID: 365743497}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!210 &1649383968
 SortingGroup:

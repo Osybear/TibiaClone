@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour {
 
 	public Transform groundTiles;
 	public Transform wallTiles;
-	public Transform ladderTilesUp;
+	public Transform ladderTiles;
 	public Transform holeTiles;
 	public Transform waterEdgeTiles;
 	public Transform rampTiles;
@@ -73,7 +73,7 @@ public class PlayerController : MonoBehaviour {
 
 		if(Input.GetMouseButtonDown(1)){
 			Vector2 mousePos = camera.ScreenToWorldPoint(Input.mousePosition);
-			Transform ladderUp = GetTile(mousePos, ladderTilesUp);
+			Transform ladderUp = GetTile(mousePos, ladderTiles);
 
 			if(ladderUp && Vector3.Distance(transform.position, ladderUp.position) < 1.5f){
 				if(isMoving)
@@ -158,7 +158,7 @@ public class PlayerController : MonoBehaviour {
 	public void SetTileRefrences(Transform floor){
 		groundTiles = floor.Find("GroundTiles");
 		wallTiles = floor.Find("WallTiles");
-		ladderTilesUp = floor.Find("LadderTiles");
+		ladderTiles = floor.Find("LadderTiles");
 		holeTiles = floor.Find("HoleTiles");
 		waterEdgeTiles = floor.Find("WaterEdgeTiles");
 	}
@@ -170,8 +170,8 @@ public class PlayerController : MonoBehaviour {
 		Transform wallLeft = GetTile(nextPos + Vector3.left, wallTiles);
 		Transform wallTopLeft = GetTile(nextPos + Vector3.left + Vector3.up, wallTiles);
 
-		Transform ladderAt = GetTile(nextPos, ladderTilesUp);
-		Transform ladderDown = GetTile(nextPos + Vector3.down, ladderTilesUp);
+		Transform ladderAt = GetTile(nextPos, ladderTiles);
+		Transform ladderDown = GetTile(nextPos + Vector3.down, ladderTiles);
 
 		if(wallDown || ladderDown){
 			renderer.sortingOrder = 2;
